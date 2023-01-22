@@ -1,32 +1,18 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CanvasCoordinate } from './canvas.model';
+import { CanvasComponentProps, CanvasCoordinate } from './canvas.model';
 import './canvas.style.css';
 
-const CanvasComponent = (props: any) => {
+const CanvasComponent = ({ penColor }: CanvasComponentProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const [canvasContext, setCanvasContext] =
-  //   useState<CanvasRenderingContext2D | null>(null);
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   if (!canvas) {
-  //     return;
-  //   }
-  //   const context2d = canvas.getContext('2d');
-  //   if (!context2d) {
-  //     return;
-  //   }
-  //   setCanvasContext(context2d);
-  // }, []);
-
-  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [isPointerDown, setIsPointerDown] = useState(false);
   const [point, setPoint] = useState<CanvasCoordinate | null>(null);
   const [prevCoord, setPrevCoord] = useState({ x: 0, y: 0 });
-  const [y, setY] = useState(0);
 
   useEffect(() => {
     if (point) {
       draw(point);
     }
+    console.log('..');
   }, [point]);
 
   const draw = (newCoord: CanvasCoordinate) => {
@@ -38,7 +24,7 @@ const CanvasComponent = (props: any) => {
     if (!canvasContext) {
       return;
     }
-    canvasContext.strokeStyle = '#FF0000';
+    canvasContext.strokeStyle = penColor;
     canvasContext.lineWidth = 1;
     canvasContext.lineCap = 'round';
     canvasContext.beginPath();
@@ -48,22 +34,23 @@ const CanvasComponent = (props: any) => {
     setPrevCoord({ x: newCoord.x, y: newCoord.y });
   };
 
-  const stopDrawing = () => {
-    setIsMouseDown(false);
-  };
-  const startDrawing = (event: PointerEvent) => {
-    setIsMouseDown(true);
+  const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    setIsPointerDown(true);
     setPrevCoord(getCoordinateByPointerEvent(event));
   };
 
-  const drawLine = (event: PointerEvent) => {
-    if (isMouseDown) {
+  const drawLine = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (isPointerDown) {
       setPoint(getCoordinateByPointerEvent(event));
     }
   };
 
+  const stopDrawing = () => {
+    setIsPointerDown(false);
+  };
+
   const getCoordinateByPointerEvent = (
-    event: PointerEvent
+    event: React.PointerEvent<HTMLCanvasElement>
   ): CanvasCoordinate => {
     const boundingArea = canvasRef.current?.getBoundingClientRect();
     if (!boundingArea) {
@@ -76,24 +63,25 @@ const CanvasComponent = (props: any) => {
     return { x, y };
   };
 
-  const handlePointerDown = (event: PointerEvent) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
     startDrawing(event);
   };
-  const handlePointerMove = (event: PointerEvent) => {
+  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
     drawLine(event);
   };
-  const handlePointerUp = (event: PointerEvent) => {
+  const handlePointerUp = () => {
     stopDrawing();
   };
-  const handlePointerOut = (event: PointerEvent) => {
+  const handlePointerOut = () => {
     stopDrawing();
   };
 
   return (
     <canvas
       className="canvas-component-wrapper"
+      height="600"
+      width="600"
       ref={canvasRef}
-      {...props}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
