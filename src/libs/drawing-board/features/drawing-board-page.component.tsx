@@ -1,8 +1,19 @@
 import React from 'react';
-import Box from '@mui/material/Box';
+import { useState } from 'react';
 import CanvasComponent from './canvas/canvas.component';
-function DrawingBoardPageComponent() {
-  return <CanvasComponent height="600" width="600"></CanvasComponent>;
-}
+import ColorPickerComponent from './color-picker/color-picker.component';
+const DrawingBoardPageComponent = () => {
+  const [penColor, setPenColor] = useState('#000000');
+
+  return (
+    <div style={{ display: 'block', overflow: 'hidden' }}>
+      <ColorPickerComponent
+        color={penColor}
+        setColor={setPenColor}
+      ></ColorPickerComponent>
+      <CanvasComponent penColor={penColor}></CanvasComponent>
+    </div>
+  );
+};
 
 export default DrawingBoardPageComponent;
