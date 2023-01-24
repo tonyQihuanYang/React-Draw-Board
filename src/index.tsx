@@ -4,16 +4,24 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import App from './App';
 import DrawingBoardPageComponent from './libs/drawing-board/features/drawing-board-page.component';
+import SignInPageComponent from './libs/shared/authentication/sign-in-page.component';
+import SignUpPageComponent from './libs/shared/authentication/sign-up-page.component';
 const router = createBrowserRouter([
   {
     path: '/',
     element: <DrawingBoardPageComponent />,
+  },
+  {
+    path: '/auth',
     children: [
       {
-        path: 'will-be-remove',
-        element: <App />,
+        path: 'sign-in',
+        element: <SignInPageComponent />,
+      },
+      {
+        path: 'sign-up',
+        element: <SignUpPageComponent />,
       },
     ],
   },
