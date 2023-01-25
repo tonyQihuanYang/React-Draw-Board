@@ -7,9 +7,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import DrawingBoardPageComponent from './libs/drawing-board/features/drawing-board-page.component';
 import SignInPageComponent from './libs/shared/authentication/sign-in-page.component';
 import SignUpPageComponent from './libs/shared/authentication/sign-up-page.component';
+import HallPageComponent from './libs/hall/features/hall-page.component';
 const router = createBrowserRouter([
   {
     path: '/',
+    element: <HallPageComponent />,
+  },
+  {
+    path: '/draw-board',
     element: <DrawingBoardPageComponent />,
   },
   {

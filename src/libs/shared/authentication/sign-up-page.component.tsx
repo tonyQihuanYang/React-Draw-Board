@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { signup, SignupDAO } from './service/auth-service';
+import { signup, SignupDAO } from './services/auth.service';
 
 export default function SignUpPageComponent() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
