@@ -33,6 +33,8 @@ const DrawingBoardPageComponent = () => {
     };
 
     const onConnected = (clientConnected: Client) => {
+      console.log(roomId);
+      console.log(userName);
       stompClientRef.current = clientConnected;
       clientConnected.subscribe(
         `/draw-room/${roomId}/update`,
