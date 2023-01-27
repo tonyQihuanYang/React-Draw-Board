@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     element: <HallPageComponent />,
   },
   {
-    path: '/draw-board',
+    path: '/draw-board/:roomId/:userName',
     element: <DrawingBoardPageComponent />,
   },
   {

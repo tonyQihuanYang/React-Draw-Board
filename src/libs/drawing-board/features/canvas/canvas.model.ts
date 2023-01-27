@@ -1,8 +1,7 @@
+import { CanvasCoordinate, DrawPoint } from '../models/DrawPoint.model';
+
 export interface CanvasComponentProps {
   penColor: string;
-}
-
-export interface CanvasCoordinate {
-  x: number;
-  y: number;
+  setDrawPoint: React.Dispatch<React.SetStateAction<DrawPoint | null>>;
+  syncDrawPoint: DrawPoint | null;
 }

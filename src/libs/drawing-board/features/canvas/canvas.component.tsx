@@ -1,8 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CanvasComponentProps, CanvasCoordinate } from './canvas.model';
+import { CanvasCoordinate, DrawPoint } from '../models/DrawPoint.model';
+import { CanvasComponentProps } from './canvas.model';
 import './canvas.style.css';
 
-const CanvasComponent = ({ penColor }: CanvasComponentProps) => {
+const CanvasComponent = ({
+  penColor,
+  setDrawPoint,
+  syncDrawPoint,
+}: CanvasComponentProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerDown, setIsPointerDown] = useState(false);
   const [point, setPoint] = useState<CanvasCoordinate | null>(null);
@@ -10,12 +15,25 @@ const CanvasComponent = ({ penColor }: CanvasComponentProps) => {
 
   useEffect(() => {
     if (point) {
-      draw(point);
+      const newDrawpoint = {
+        prevCoord,
+        newCoord: point,
+        penWidth: 1,
+        penColor,
+      };
+      draw(newDrawpoint);
+      setDrawPoint(newDrawpoint);
+      setPrevCoord(point);
     }
-    console.log('..');
   }, [point]);
 
-  const draw = (newCoord: CanvasCoordinate) => {
+  useEffect(() => {
+    if (syncDrawPoint) {
+      draw(syncDrawPoint);
+    }
+  }, [syncDrawPoint]);
+
+  const draw = (p: DrawPoint) => {
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -24,14 +42,13 @@ const CanvasComponent = ({ penColor }: CanvasComponentProps) => {
     if (!canvasContext) {
       return;
     }
-    canvasContext.strokeStyle = penColor;
-    canvasContext.lineWidth = 1;
+    canvasContext.strokeStyle = p.penColor;
+    canvasContext.lineWidth = p.penWidth;
     canvasContext.lineCap = 'round';
     canvasContext.beginPath();
-    canvasContext.moveTo(prevCoord.x, prevCoord.y);
-    canvasContext.lineTo(newCoord.x, newCoord.y);
+    canvasContext.moveTo(p.prevCoord.x, p.prevCoord.y);
+    canvasContext.lineTo(p.newCoord.x, p.newCoord.y);
     canvasContext.stroke();
-    setPrevCoord({ x: newCoord.x, y: newCoord.y });
   };
 
   const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
