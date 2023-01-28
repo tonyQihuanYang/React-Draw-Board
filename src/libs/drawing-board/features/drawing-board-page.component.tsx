@@ -5,6 +5,7 @@ import CanvasComponent from './canvas/canvas.component';
 import ColorPickerComponent from './color-picker/color-picker.component';
 import { DrawPoint, DrawPointMessage } from './models/DrawPoint.model';
 import { useParams } from 'react-router-dom';
+import CanvasViewComponent from '../components/canvas-view/canvas-view.component';
 
 const WS_URL = `${process.env.REACT_APP_API_URL}/ws`;
 const DrawingBoardPageComponent = () => {
@@ -16,6 +17,7 @@ const DrawingBoardPageComponent = () => {
   const [penColor, setPenColor] = useState('#000000');
   const [drawPoint, setDrawPoint] = useState<DrawPoint | null>(null);
   const [syncDrawPoint, setSyncDrawPoint] = useState<DrawPoint | null>(null);
+  const [permanentCanvas, setPermanentCancas] = useState<any>(null);
 
   const stompClientRef = useRef<Client | null>(null);
   useEffect(() => {
@@ -23,9 +25,9 @@ const DrawingBoardPageComponent = () => {
       return;
     }
     const connect = () => {
-      const Sock = new SockJS(WS_URL);
-      const stompClient = over(Sock);
-      stompClient.connect({}, () => onConnected(stompClient), onError);
+      // const Sock = new SockJS(WS_URL);
+      // const stompClient = over(Sock);
+      // stompClient.connect({}, () => onConnected(stompClient), onError);
     };
 
     const onError = (err: any) => {
@@ -47,8 +49,14 @@ const DrawingBoardPageComponent = () => {
         }
       );
     };
-    connect();
+    // connect();
   });
+
+  useEffect(() => {
+    console.log('Updated');
+    console.log(permanentCanvas);
+    // oCtx.putImageData(oImgData, 0, 0);
+  }, [permanentCanvas]);
 
   useEffect(() => {
     if (!stompClientRef.current) {
@@ -70,11 +78,17 @@ const DrawingBoardPageComponent = () => {
         color={penColor}
         setColor={setPenColor}
       ></ColorPickerComponent>
-      <CanvasComponent
-        syncDrawPoint={syncDrawPoint}
-        setDrawPoint={setDrawPoint}
-        penColor={penColor}
-      ></CanvasComponent>
+      <div>
+        <CanvasComponent
+          syncDrawPoint={syncDrawPoint}
+          setDrawPoint={setDrawPoint}
+          setPermanentCancas={setPermanentCancas}
+          penColor={penColor}
+        ></CanvasComponent>
+        <CanvasViewComponent
+          permanentCanvas={permanentCanvas}
+        ></CanvasViewComponent>
+      </div>
     </div>
   );
 };
