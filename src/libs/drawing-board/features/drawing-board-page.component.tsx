@@ -1,33 +1,28 @@
 import { over, Client, Message } from 'stompjs';
 import SockJS from 'sockjs-client';
 import React, { useEffect, useRef, useState } from 'react';
-import CanvasComponent from './canvas/canvas.component';
-import ColorPickerComponent from './color-picker/color-picker.component';
-import { DrawPoint, DrawPointMessage } from './models/DrawPoint.model';
 import { useParams } from 'react-router-dom';
-import CanvasViewComponent from '../components/canvas-view/canvas-view.component';
+import DrawBoardComponent from './draw-board/draw-board.component';
+import SyncBoardComponent from './sync-board/sync-board.component';
 
 const WS_URL = `${process.env.REACT_APP_API_URL}/ws`;
 const DrawingBoardPageComponent = () => {
+  console.log('DrawingBoardPageComponent');
   const { roomId, userName } = useParams<{
     roomId: string;
     userName: string;
   }>();
 
-  const [penColor, setPenColor] = useState('#000000');
-  const [drawPoint, setDrawPoint] = useState<DrawPoint | null>(null);
-  const [syncDrawPoint, setSyncDrawPoint] = useState<DrawPoint | null>(null);
-  const [permanentCanvas, setPermanentCancas] = useState<any>(null);
-
   const stompClientRef = useRef<Client | null>(null);
+  const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     if (stompClientRef.current) {
       return;
     }
     const connect = () => {
-      // const Sock = new SockJS(WS_URL);
-      // const stompClient = over(Sock);
-      // stompClient.connect({}, () => onConnected(stompClient), onError);
+      const Sock = new SockJS(WS_URL);
+      const stompClient = over(Sock);
+      stompClient.connect({}, () => onConnected(stompClient), onError);
     };
 
     const onError = (err: any) => {
@@ -35,60 +30,45 @@ const DrawingBoardPageComponent = () => {
     };
 
     const onConnected = (clientConnected: Client) => {
-      console.log(roomId);
-      console.log(userName);
       stompClientRef.current = clientConnected;
+      console.log('connected...');
+      console.log('subscribe...');
+      // console.log(roomId);
+      // console.log(userName);
       clientConnected.subscribe(
         `/draw-room/${roomId}/update`,
         (msg: Message) => {
-          const message: DrawPointMessage = JSON.parse(msg.body);
-          const drawPointToSync: DrawPoint = message.message;
-          if (message.sendBy !== userName) {
-            setSyncDrawPoint(drawPointToSync);
-          }
+          console.log('receiver...');
+          console.log(msg);
+          // const message: DrawPointMessage = JSON.parse(msg.body);
+          // const drawPointToSync: DrawPoint = message.message;
+          // if (message.sendBy !== userName) {
+          // setSyncDrawPoint(drawPointToSync);
+          // }
         }
       );
+      setIsReady(true);
     };
-    // connect();
-  });
-
-  useEffect(() => {
-    console.log('Updated');
-    console.log(permanentCanvas);
-    // oCtx.putImageData(oImgData, 0, 0);
-  }, [permanentCanvas]);
-
-  useEffect(() => {
-    if (!stompClientRef.current) {
-      return;
-    }
-    const stompClient = stompClientRef.current;
-    const drawRoomMessage = {
-      roomId,
-      sendBy: userName,
-      message: drawPoint,
-    };
-
-    stompClient.send('/app/draw-room', {}, JSON.stringify(drawRoomMessage));
-  }, [drawPoint]);
+    connect();
+  }, []);
 
   return (
     <div style={{ display: 'block', overflow: 'hidden' }}>
-      <ColorPickerComponent
-        color={penColor}
-        setColor={setPenColor}
-      ></ColorPickerComponent>
-      <div>
-        <CanvasComponent
-          syncDrawPoint={syncDrawPoint}
-          setDrawPoint={setDrawPoint}
-          setPermanentCancas={setPermanentCancas}
-          penColor={penColor}
-        ></CanvasComponent>
-        <CanvasViewComponent
-          permanentCanvas={permanentCanvas}
-        ></CanvasViewComponent>
-      </div>
+      {isReady && stompClientRef.current && roomId && userName ? (
+        <>
+          <DrawBoardComponent
+            stompClient={stompClientRef.current}
+            roomId={roomId}
+            userName={userName}
+          ></DrawBoardComponent>
+          <SyncBoardComponent
+            stompClient={stompClientRef.current}
+            roomId={roomId}
+          ></SyncBoardComponent>
+        </>
+      ) : (
+        <> Waiting on connection </>
+      )}
     </div>
   );
 };
