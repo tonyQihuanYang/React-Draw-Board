@@ -30,7 +30,7 @@ const DrawBoardComponent = ({
     const drawRoomMessage = {
       roomId,
       sendBy: userName,
-      message: 'stf', //imageData.dataURL,
+      message: imageData.dataURL,
     };
     // console.log(imageData);
     // console.log('Getting Update Of ImageData');
@@ -72,9 +72,11 @@ const DrawBoardComponent = ({
         {/* <CanvasViewComponent */}
         {/*   imageData={imageData?.imageData} */}
         {/* ></CanvasViewComponent> */}
-        <ImageViewComponent
-          imageData={imageData?.arrayBuffer}
-        ></ImageViewComponent>
+
+        <ImageViewComponent imageData={imageData?.dataURL}></ImageViewComponent>
+        {/* <ImageViewComponent */}
+        {/*   imageData={imageData?.arrayBuffer} */}
+        {/* ></ImageViewComponent> */}
       </div>
     </div>
   );

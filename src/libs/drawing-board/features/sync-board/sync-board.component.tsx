@@ -1,6 +1,7 @@
 import { Client, Message } from 'stompjs';
 import React, { useEffect, useRef, useState } from 'react';
 import CanvasViewComponent from '../../components/canvas-view/canvas-view.component';
+import ImageViewComponent from '../../components/image-view/image-view.component';
 
 const SyncBoardComponent = ({
   stompClient,
@@ -10,27 +11,19 @@ const SyncBoardComponent = ({
   roomId: string;
 }) => {
   console.log('SyncBoardComponent');
-  const imageData = useRef<ImageData>();
-
+  const [imageData, setImageData] = useState<string>();
   useEffect(() => {
     stompClient.subscribe(`/draw-room/${roomId}/update`, (msg: Message) => {
       console.log('Received Update From Server');
-      console.log(msg);
-      // const message: DrawPointMessage = JSON.parse(msg.body);
-      // const drawPointToSync: DrawPoint = message.message;
-      // if (message.sendBy !== userName) {
-      //   setSyncDrawPoint(drawPointToSync);
-      // }
+      const message = JSON.parse(msg.body);
+      setImageData(message.message as unknown as string);
+      console.log(message.message);
     });
   }, []);
 
   return (
     <div style={{ display: 'block', overflow: 'hidden' }}>
-      {imageData.current ? (
-        <CanvasViewComponent
-          imageData={imageData.current}
-        ></CanvasViewComponent>
-      ) : null}
+      <ImageViewComponent imageData={imageData}></ImageViewComponent>
     </div>
   );
 };

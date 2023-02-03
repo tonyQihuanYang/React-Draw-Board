@@ -28,11 +28,11 @@ const ImageViewComponent = ({
         },
         false
       );
-      const blob = new Blob([imageData as unknown as ArrayBuffer], {
-        type: MINE_TYPE,
-      });
-      image.src = URL.createObjectURL(blob);
-      // image.src = imageData as unknown as string;
+      // const blob = new Blob([imageData as unknown as ArrayBuffer], {
+      //   type: MINE_TYPE,
+      // });
+      // image.src = URL.createObjectURL(blob);
+      image.src = imageData as unknown as string;
     }
     //
     //

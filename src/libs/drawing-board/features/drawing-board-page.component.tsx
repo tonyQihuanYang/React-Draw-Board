@@ -31,22 +31,6 @@ const DrawingBoardPageComponent = () => {
 
     const onConnected = (clientConnected: Client) => {
       stompClientRef.current = clientConnected;
-      console.log('connected...');
-      console.log('subscribe...');
-      // console.log(roomId);
-      // console.log(userName);
-      clientConnected.subscribe(
-        `/draw-room/${roomId}/update`,
-        (msg: Message) => {
-          console.log('receiver...');
-          console.log(msg);
-          // const message: DrawPointMessage = JSON.parse(msg.body);
-          // const drawPointToSync: DrawPoint = message.message;
-          // if (message.sendBy !== userName) {
-          // setSyncDrawPoint(drawPointToSync);
-          // }
-        }
-      );
       setIsReady(true);
     };
     connect();
