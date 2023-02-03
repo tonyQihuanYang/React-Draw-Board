@@ -1,0 +1,10 @@
+.canvas-component-wrapper {
+  border: 1px black solid;
+  /* margin: 1rem; */
+  /* display: block; */
+  overflow: hidden;
+  overflow-y: hidden;
+  pointer-events: auto;
+  z-index: 3;
+  position: absolute;
+}
