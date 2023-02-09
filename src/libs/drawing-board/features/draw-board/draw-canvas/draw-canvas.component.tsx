@@ -14,6 +14,15 @@ const DrawCanvasComponent = ({
   const isPointerDown = useRef(false);
   const prevCoord = useRef({ x: 0, y: 0 });
 
+  useEffect(() => {
+    if (canvasRef.current) {
+      canvasRef.current.width = window.innerWidth;
+      // canvasRef.current.height = window.innerHeight;
+      canvasRef.current.width = 600;
+      canvasRef.current.height = 600;
+    }
+  });
+
   const startDraw = (_point: CanvasCoordinate) => {
     const newDrawpoint = {
       prevCoord: prevCoord.current,
@@ -44,14 +53,14 @@ const DrawCanvasComponent = ({
     canvasContext.stroke();
   };
 
-  const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const startDrawing = (clientX: number, clientY: number) => {
     isPointerDown.current = true;
-    prevCoord.current = getCoordinateByPointerEvent(event);
+    prevCoord.current = calcCoordinate(clientX, clientY);
   };
 
-  const drawLine = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const drawLine = (clientX: number, clientY: number) => {
     if (isPointerDown.current) {
-      startDraw(getCoordinateByPointerEvent(event));
+      startDraw(calcCoordinate(clientX, clientY));
     }
   };
 
@@ -82,8 +91,9 @@ const DrawCanvasComponent = ({
     }, MINE_TYPE);
   };
 
-  const getCoordinateByPointerEvent = (
-    event: React.PointerEvent<HTMLCanvasElement>
+  const calcCoordinate = (
+    clientX: number,
+    clientY: number
   ): CanvasCoordinate => {
     const boundingArea = canvasRef.current?.getBoundingClientRect();
     if (!boundingArea) {
@@ -91,35 +101,72 @@ const DrawCanvasComponent = ({
     }
     const scrollLeft = window.scrollX ?? 0;
     const scrollTop = window.scrollY ?? 0;
-    const x = event.pageX - boundingArea.left - scrollLeft;
-    const y = event.pageY - boundingArea.top - scrollTop;
+    const x = clientX - boundingArea.left - scrollLeft;
+    const y = clientY - boundingArea.top - scrollTop;
     return { x, y };
   };
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    startDrawing(event);
+  const handleTouchDown = (event: React.TouchEvent<HTMLCanvasElement>) => {
+    console.log('td');
+    startDrawing(event.touches[0].clientX, event.touches[0].clientY);
   };
-  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    drawLine(event);
+  const handleTouchMove = (event: React.TouchEvent<HTMLCanvasElement>) => {
+    console.log('tm');
+    drawLine(event.touches[0].clientX, event.touches[0].clientY);
   };
-  const handlePointerUp = () => {
-    stopDrawing();
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    startDrawing(event.clientX, event.clientY);
   };
-  const handlePointerOut = () => {
-    // stopDrawing();
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log('mm');
+    drawLine(event.clientX, event.clientY);
   };
+
+  canvasRef.current?.addEventListener(
+    'touchmove',
+    (event) => {
+      event.preventDefault();
+      drawLine(event.touches[0].clientX, event.touches[0].clientY);
+    },
+    { passive: false }
+  );
+  canvasRef.current?.addEventListener(
+    'touchstart',
+    (event) => {
+      event.preventDefault();
+      startDrawing(event.touches[0].clientX, event.touches[0].clientY);
+    },
+    { passive: false }
+  );
+
+  canvasRef.current?.addEventListener(
+    'touchend',
+    (event) => {
+      event.preventDefault();
+      stopDrawing();
+    },
+    { passive: false }
+  );
+  canvasRef.current?.addEventListener(
+    'mousemove',
+    (event) => {
+      event.preventDefault();
+    },
+    { passive: false }
+  );
 
   return (
     <canvas
+      id="canvasId"
       className="canvas-component-wrapper"
-      height="600"
-      width="600"
       ref={canvasRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerOut={handlePointerOut}
+      // onTouchStart={handleTouchDown}
+      // onTouchMove={handleTouchMove}
+      // onTouchCancel={stopDrawing}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={stopDrawing}
     />
   );
 };

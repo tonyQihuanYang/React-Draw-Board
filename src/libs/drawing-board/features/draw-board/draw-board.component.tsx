@@ -69,15 +69,12 @@ const DrawBoardComponent = ({
           setImageData={setImageData}
           penColor={penColor}
         ></DrawCanvasComponent>
-        {/* <CanvasViewComponent */}
-        {/*   imageData={imageData?.imageData} */}
-        {/* ></CanvasViewComponent> */}
-
         <ImageViewComponent imageData={imageData?.dataURL}></ImageViewComponent>
-        {/* <ImageViewComponent */}
-        {/*   imageData={imageData?.arrayBuffer} */}
-        {/* ></ImageViewComponent> */}
       </div>
+
+      {/* <ImageViewComponent */}
+      {/*   imageData={imageData?.arrayBuffer} */}
+      {/* ></ImageViewComponent> */}
     </div>
   );
 };

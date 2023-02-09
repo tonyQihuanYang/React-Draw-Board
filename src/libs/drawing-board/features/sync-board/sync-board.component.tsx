@@ -11,6 +11,7 @@ const SyncBoardComponent = ({
   roomId: string;
 }) => {
   console.log('SyncBoardComponent');
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [imageData, setImageData] = useState<string>();
   useEffect(() => {
     stompClient.subscribe(`/draw-room/${roomId}/update`, (msg: Message) => {

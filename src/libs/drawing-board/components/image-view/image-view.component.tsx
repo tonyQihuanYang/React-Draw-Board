@@ -8,23 +8,37 @@ const ImageViewComponent = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
-    if (!imageData) {
+    if (canvasRef.current) {
+      // canvasRef.current.width = window.innerWidth;
+      // canvasRef.current.height = window.innerHeight;
+      canvasRef.current.width = 600;
+      canvasRef.current.height = 600;
+    }
+  }, []);
+  useEffect(() => {
+    if (!imageData || !canvasRef.current) {
       return;
     }
-    const canvasContext = canvasRef.current?.getContext('2d');
+    const canvasContext = canvasRef.current.getContext('2d');
     if (!canvasContext) {
       return;
     }
     const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = 600;
-    tempCanvas.height = 600;
+    tempCanvas.width = canvasRef.current.width;
+    tempCanvas.height = canvasRef.current.height;
 
     let image = new Image();
     if (image) {
       image.addEventListener(
         'load',
         function () {
-          canvasContext.drawImage(image, 0, 0, 600, 600);
+          canvasContext.drawImage(
+            image,
+            0,
+            0,
+            tempCanvas.height,
+            tempCanvas.width
+          );
         },
         false
       );
@@ -44,8 +58,6 @@ const ImageViewComponent = ({
   return (
     <canvas
       style={{ position: 'absolute', border: '1px black solid' }}
-      height="600"
-      width="600"
       ref={canvasRef}
     />
   );
