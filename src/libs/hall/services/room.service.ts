@@ -1,16 +1,26 @@
 import axios, { AxiosResponse } from 'axios';
-import { CreateRoomPayload, JoinRoomPayload } from './room.model';
+import { CreateRoomPayload, JoinRoomPayload, RoomInfo } from './room.model';
 const URL = process.env.REACT_APP_API_URL;
 
-export function createRoom(
+export async function createRoom(
   username: CreateRoomPayload
-): Promise<AxiosResponse<any, any>> {
-  return axios.post(`${URL}/room/create/${username}`);
+): Promise<RoomInfo | undefined> {
+  try {
+    const { data } = await axios.post<RoomInfo>(
+      `${URL}/room/create/${username}`
+    );
+    return data || null;
+  } catch (_) {}
 }
 
-export function joinRoom({
+export async function joinRoom({
   roomId,
   name,
-}: JoinRoomPayload): Promise<AxiosResponse<any, any>> {
-  return axios.post(`${URL}/room/join/${roomId}/${name}`);
+}: JoinRoomPayload): Promise<RoomInfo | undefined> {
+  try {
+    const { data } = await axios.post<RoomInfo>(
+      `${URL}/room/join/${roomId}/${name}`
+    );
+    return data;
+  } catch (_) {}
 }

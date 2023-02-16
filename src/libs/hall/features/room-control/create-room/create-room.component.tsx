@@ -5,10 +5,11 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { createRoom } from '../../../services/room.service';
 import { CreateRoomPayload } from '../../../services/room.model';
-import { WidthFull } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreateRoomComponent() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const payload = {
@@ -17,7 +18,14 @@ export default function CreateRoomComponent() {
     if (!payload.name) {
       return;
     }
-    createRoom(payload.name as unknown as CreateRoomPayload);
+    try {
+      const result = await createRoom(
+        payload.name as unknown as CreateRoomPayload
+      );
+      result && navigate(`/draw-board/${result.id}/${payload.name}`);
+    } catch (_) {
+      console.error(_);
+    }
   };
 
   return (

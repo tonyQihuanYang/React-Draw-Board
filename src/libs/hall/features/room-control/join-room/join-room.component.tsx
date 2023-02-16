@@ -5,9 +5,11 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { joinRoom } from '../../../services/room.service';
 import { JoinRoomPayload } from '../../../services/room.model';
+import { useNavigate } from 'react-router-dom';
 
 export default function JoinRoomComponent() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const payload = {
@@ -17,7 +19,12 @@ export default function JoinRoomComponent() {
     if (!payload.roomId || !payload.name) {
       return;
     }
-    joinRoom(payload as unknown as JoinRoomPayload);
+    try {
+      const result = await joinRoom(payload as unknown as JoinRoomPayload);
+      result && navigate(`/draw-board/${result.id}/${payload.name}`);
+    } catch (_) {
+      console.error(_);
+    }
   };
 
   return (
