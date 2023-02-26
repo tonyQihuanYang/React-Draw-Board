@@ -1,16 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 
-const MINE_TYPE = 'image/png';
-const ImageViewComponent = ({
-  imageData,
-}: {
-  imageData?: ArrayBuffer | string;
-}) => {
+const ImageViewComponent = ({ imageData }: { imageData?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (canvasRef.current) {
-      // canvasRef.current.width = window.innerWidth;
-      // canvasRef.current.height = window.innerHeight;
       canvasRef.current.width = 600;
       canvasRef.current.height = 600;
     }
@@ -42,17 +35,8 @@ const ImageViewComponent = ({
         },
         false
       );
-      // const blob = new Blob([imageData as unknown as ArrayBuffer], {
-      //   type: MINE_TYPE,
-      // });
-      // image.src = URL.createObjectURL(blob);
-      image.src = imageData as unknown as string;
+      image.src = imageData;
     }
-    //
-    //
-    // const tempCanvasCtx = tempCanvas.getContext('2d');
-    // tempCanvasCtx && tempCanvasCtx.putImageData(image, 0, 0);
-    // canvasContext.drawImage(tempCanvas, 0, 0);
   }, [imageData]);
 
   return (

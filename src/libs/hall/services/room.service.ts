@@ -10,7 +10,9 @@ export async function createRoom(
       `${URL}/room/create/${username}`
     );
     return data || null;
-  } catch (_) {}
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function joinRoom({
@@ -22,5 +24,7 @@ export async function joinRoom({
       `${URL}/room/join/${roomId}/${name}`
     );
     return data;
-  } catch (_) {}
+  } catch (err) {
+    throw err;
+  }
 }

@@ -6,9 +6,11 @@ import ImageViewComponent from '../../components/image-view/image-view.component
 const SyncBoardComponent = ({
   stompClient,
   roomId,
+  className,
 }: {
   stompClient: Client;
   roomId: string;
+  className?: string;
 }) => {
   console.log('SyncBoardComponent');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,7 +25,7 @@ const SyncBoardComponent = ({
   }, []);
 
   return (
-    <div style={{ display: 'block', overflow: 'hidden' }}>
+    <div className={className} style={{ display: 'block', overflow: 'hidden' }}>
       <ImageViewComponent imageData={imageData}></ImageViewComponent>
     </div>
   );

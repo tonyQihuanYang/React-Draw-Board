@@ -6,9 +6,21 @@ import Typography from '@mui/material/Typography';
 import { joinRoom } from '../../../services/room.service';
 import { JoinRoomPayload } from '../../../services/room.model';
 import { useNavigate } from 'react-router-dom';
+import { Alert, Snackbar } from '@mui/material';
 
 export default function JoinRoomComponent() {
   const navigate = useNavigate();
+  const [open, setOpen] = React.useState(false);
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -23,12 +35,17 @@ export default function JoinRoomComponent() {
       const result = await joinRoom(payload as unknown as JoinRoomPayload);
       result && navigate(`/draw-board/${result.id}/${payload.name}`);
     } catch (_) {
+      setOpen(true);
       console.error(_);
     }
   };
 
   return (
     <>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert severity="error">Error Joining Room</Alert>
+      </Snackbar>
+
       <Typography component="h1" variant="h5">
         Join Room
       </Typography>

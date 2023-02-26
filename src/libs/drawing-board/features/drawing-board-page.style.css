@@ -1,0 +1,13 @@
+.draw-board-page-wrapper {
+  display: block;
+  overflow: hidden;
+  margin: 8px;
+}
+
+.draw-board-wrapper {
+  z-index: 100;
+}
+
+.sync-board-wrapper {
+  z-index: 0;
+}

@@ -3,12 +3,15 @@ import { CanvasCoordinate, DrawPoint } from '../../models/DrawPoint.model';
 import { DrawCanvasComponentProps } from './draw-canvas.model';
 import './draw-canvas.style.css';
 
+const DRAW_EVENT = '/app/draw-room';
 const MINE_TYPE = 'image/png';
 const DrawCanvasComponent = ({
+  stompClient,
+  roomId,
+  userName,
   penColor,
   setImageData,
 }: DrawCanvasComponentProps) => {
-  console.log('DrawCanvasComponent..');
   const readerRef = useRef<FileReader>(new FileReader());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isPointerDown = useRef(false);
@@ -16,12 +19,43 @@ const DrawCanvasComponent = ({
 
   useEffect(() => {
     if (canvasRef.current) {
-      canvasRef.current.width = window.innerWidth;
+      console.log('1');
+      // canvasRef.current.width = window.innerWidth;
       // canvasRef.current.height = window.innerHeight;
       canvasRef.current.width = 600;
       canvasRef.current.height = 600;
+
+      canvasRef.current?.addEventListener(
+        'touchmove',
+        (event) => {
+          console.log('touchMove');
+          event.preventDefault();
+          drawLine(event.touches[0].clientX, event.touches[0].clientY);
+        },
+        { passive: false }
+      );
+
+      canvasRef.current?.addEventListener(
+        'touchstart',
+        (event) => {
+          console.log('touchStarted');
+          event.preventDefault();
+          startDrawing(event.touches[0].clientX, event.touches[0].clientY);
+        },
+        { passive: false }
+      );
+
+      canvasRef.current?.addEventListener(
+        'touchend',
+        (event) => {
+          console.log('touchEnd');
+          event.preventDefault();
+          stopDrawing();
+        },
+        { passive: false }
+      );
     }
-  });
+  }, []);
 
   const startDraw = (_point: CanvasCoordinate) => {
     const newDrawpoint = {
@@ -30,6 +64,12 @@ const DrawCanvasComponent = ({
       penWidth: 1,
       penColor,
     };
+    const drawRoomMessage = {
+      roomId,
+      sendBy: userName,
+      message: newDrawpoint,
+    };
+    stompClient.send(DRAW_EVENT, {}, JSON.stringify(drawRoomMessage));
     drawCanvas(newDrawpoint);
     prevCoord.current = _point;
   };
@@ -106,64 +146,20 @@ const DrawCanvasComponent = ({
     return { x, y };
   };
 
-  const handleTouchDown = (event: React.TouchEvent<HTMLCanvasElement>) => {
-    console.log('td');
-    startDrawing(event.touches[0].clientX, event.touches[0].clientY);
-  };
-  const handleTouchMove = (event: React.TouchEvent<HTMLCanvasElement>) => {
-    console.log('tm');
-    drawLine(event.touches[0].clientX, event.touches[0].clientY);
-  };
-
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log('mouseDown');
     startDrawing(event.clientX, event.clientY);
   };
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    console.log('mm');
+    console.log('mouseMove');
     drawLine(event.clientX, event.clientY);
   };
-
-  canvasRef.current?.addEventListener(
-    'touchmove',
-    (event) => {
-      event.preventDefault();
-      drawLine(event.touches[0].clientX, event.touches[0].clientY);
-    },
-    { passive: false }
-  );
-  canvasRef.current?.addEventListener(
-    'touchstart',
-    (event) => {
-      event.preventDefault();
-      startDrawing(event.touches[0].clientX, event.touches[0].clientY);
-    },
-    { passive: false }
-  );
-
-  canvasRef.current?.addEventListener(
-    'touchend',
-    (event) => {
-      event.preventDefault();
-      stopDrawing();
-    },
-    { passive: false }
-  );
-  canvasRef.current?.addEventListener(
-    'mousemove',
-    (event) => {
-      event.preventDefault();
-    },
-    { passive: false }
-  );
 
   return (
     <canvas
       id="canvasId"
       className="canvas-component-wrapper"
       ref={canvasRef}
-      // onTouchStart={handleTouchDown}
-      // onTouchMove={handleTouchMove}
-      // onTouchCancel={stopDrawing}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={stopDrawing}
