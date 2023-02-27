@@ -49,11 +49,11 @@ const DrawingBoardPageComponent = () => {
             roomId={roomId}
             userName={userName}
           ></DrawBoardComponent>
-          {/* <SyncBoardComponent */}
-          {/*   className="sync-board-wrapper" */}
-          {/*   stompClient={stompClientRef.current} */}
-          {/*   roomId={roomId} */}
-          {/* ></SyncBoardComponent> */}
+          <SyncBoardComponent
+            className="sync-board-wrapper"
+            stompClient={stompClientRef.current}
+            roomId={roomId}
+          ></SyncBoardComponent>
         </>
       ) : (
         <> Waiting on connection </>
