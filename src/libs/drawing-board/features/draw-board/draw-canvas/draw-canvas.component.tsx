@@ -148,11 +148,12 @@ const DrawCanvasComponent = ({
 
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     console.log('mouseDown');
-    startDrawing(event.clientX, event.clientY);
+    console.log(event);
+    startDrawing(event.pageX, event.pageY);
   };
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     console.log('mouseMove');
-    drawLine(event.clientX, event.clientY);
+    drawLine(event.pageX, event.pageY);
   };
 
   return (
