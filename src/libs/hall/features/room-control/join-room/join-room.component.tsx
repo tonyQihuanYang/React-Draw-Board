@@ -3,8 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { joinRoom } from '../../../services/room.service';
-import { JoinRoomPayload } from '../../../services/room.model';
+import { joinRoom, JoinRoomPayload } from '../../../../shared/room/services';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Snackbar } from '@mui/material';
 

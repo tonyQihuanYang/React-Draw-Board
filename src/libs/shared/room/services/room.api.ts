@@ -28,3 +28,12 @@ export async function joinRoom({
     throw err;
   }
 }
+
+export async function getRoom(roomId: string) {
+  try {
+    const { data } = await axios.get<RoomInfo>(`${URL}/room/${roomId}`);
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}

@@ -3,8 +3,10 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { createRoom } from '../../../services/room.service';
-import { CreateRoomPayload } from '../../../services/room.model';
+import {
+  createRoom,
+  CreateRoomPayload,
+} from '../../../../shared/room/services';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateRoomComponent() {
