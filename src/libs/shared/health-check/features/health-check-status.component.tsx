@@ -3,6 +3,7 @@ import CloudOffIcon from '@mui/icons-material/CloudOff';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import { useState, useEffect } from 'react';
 import { healthCheck } from '../service/health-check.service';
+
 const HealthCheckStatusComponent = () => {
   const [isOnline, setIsOnline] = useState(false);
   useEffect(() => {
@@ -28,12 +29,12 @@ const HealthCheckStatusComponent = () => {
       {isOnline ? (
         <>
           <CloudDoneIcon></CloudDoneIcon>
-          <span>Serivce avaiable</span>
+          <span style={{ padding: '4px' }}>Serivce avaiable</span>
         </>
       ) : (
         <>
           <CloudOffIcon></CloudOffIcon>
-          <span>Serivce currently not avaiable</span>
+          <span style={{ padding: '4px' }}>Serivce currently not avaiable</span>
         </>
       )}
     </div>

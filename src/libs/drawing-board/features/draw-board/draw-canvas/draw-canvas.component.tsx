@@ -1,18 +1,56 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
+import {
+  clearCanvas,
+  getCanvasDataURL,
+  getCanvasImageData,
+} from '../../../utils/canvasUtils';
 import { CanvasCoordinate, DrawPoint } from '../../models/DrawPoint.model';
 import { DrawCanvasComponentProps } from './draw-canvas.model';
 import './draw-canvas.style.css';
 
-const MINE_TYPE = 'image/png';
 const DrawCanvasComponent = ({
+  roomService,
   penColor,
   setImageData,
 }: DrawCanvasComponentProps) => {
-  console.log('DrawCanvasComponent..');
   const readerRef = useRef<FileReader>(new FileReader());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isPointerDown = useRef(false);
   const prevCoord = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      canvasRef.current.width = 600;
+      canvasRef.current.height = 600;
+
+      canvasRef.current?.addEventListener(
+        'touchmove',
+        (event) => {
+          event.preventDefault();
+          drawLine(event.touches[0].clientX, event.touches[0].clientY);
+        },
+        { passive: false }
+      );
+
+      canvasRef.current?.addEventListener(
+        'touchstart',
+        (event) => {
+          event.preventDefault();
+          startDrawing(event.touches[0].clientX, event.touches[0].clientY);
+        },
+        { passive: false }
+      );
+
+      canvasRef.current?.addEventListener(
+        'touchend',
+        (event) => {
+          event.preventDefault();
+          stopDrawing();
+        },
+        { passive: false }
+      );
+    }
+  }, []);
 
   const startDraw = (_point: CanvasCoordinate) => {
     const newDrawpoint = {
@@ -21,6 +59,7 @@ const DrawCanvasComponent = ({
       penWidth: 1,
       penColor,
     };
+    roomService.sendDrawUpdate(newDrawpoint);
     drawCanvas(newDrawpoint);
     prevCoord.current = _point;
   };
@@ -44,14 +83,14 @@ const DrawCanvasComponent = ({
     canvasContext.stroke();
   };
 
-  const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const startDrawing = (clientX: number, clientY: number) => {
     isPointerDown.current = true;
-    prevCoord.current = getCoordinateByPointerEvent(event);
+    prevCoord.current = calcCoordinate(clientX, clientY);
   };
 
-  const drawLine = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const drawLine = (clientX: number, clientY: number) => {
     if (isPointerDown.current) {
-      startDraw(getCoordinateByPointerEvent(event));
+      startDraw(calcCoordinate(clientX, clientY));
     }
   };
 
@@ -65,25 +104,17 @@ const DrawCanvasComponent = ({
     if (!canvasContext) {
       return;
     }
-
-    const imageData = canvasContext.getImageData(0, 0, 600, 600);
-    const dataURL = canvasRef.current.toDataURL();
-    canvasRef.current.toBlob(async (blob) => {
-      if (!blob) {
-        return;
-      }
-      try {
-        const arrayBuffer = await blob.arrayBuffer();
-        setImageData({ imageData, dataURL, arrayBuffer: arrayBuffer });
-        canvasContext.clearRect(0, 0, 600, 600);
-      } catch (err) {
-        console.error(err);
-      }
-    }, MINE_TYPE);
+    //
+    const imageData = getCanvasImageData(canvasRef.current);
+    const dataURL = getCanvasDataURL(canvasRef.current);
+    // const arrayBuffer = await getCanvasArrayBuffer(canvasRef.current);
+    setImageData({ imageData, dataURL, arrayBuffer: null });
+    clearCanvas(canvasRef.current);
   };
 
-  const getCoordinateByPointerEvent = (
-    event: React.PointerEvent<HTMLCanvasElement>
+  const calcCoordinate = (
+    clientX: number,
+    clientY: number
   ): CanvasCoordinate => {
     const boundingArea = canvasRef.current?.getBoundingClientRect();
     if (!boundingArea) {
@@ -91,35 +122,26 @@ const DrawCanvasComponent = ({
     }
     const scrollLeft = window.scrollX ?? 0;
     const scrollTop = window.scrollY ?? 0;
-    const x = event.pageX - boundingArea.left - scrollLeft;
-    const y = event.pageY - boundingArea.top - scrollTop;
+    const x = clientX - boundingArea.left - scrollLeft;
+    const y = clientY - boundingArea.top - scrollTop;
     return { x, y };
   };
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    startDrawing(event);
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    startDrawing(event.pageX, event.pageY);
   };
-  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    drawLine(event);
-  };
-  const handlePointerUp = () => {
-    stopDrawing();
-  };
-  const handlePointerOut = () => {
-    // stopDrawing();
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    drawLine(event.pageX, event.pageY);
   };
 
   return (
     <canvas
+      id="canvasId"
       className="canvas-component-wrapper"
-      height="600"
-      width="600"
       ref={canvasRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerOut={handlePointerOut}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={stopDrawing}
     />
   );
 };

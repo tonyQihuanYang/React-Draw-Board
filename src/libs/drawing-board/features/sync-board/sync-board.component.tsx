@@ -1,29 +1,60 @@
-import { Client, Message } from 'stompjs';
-import React, { useEffect, useRef, useState } from 'react';
-import CanvasViewComponent from '../../components/canvas-view/canvas-view.component';
-import ImageViewComponent from '../../components/image-view/image-view.component';
+import React, { useRef, useEffect } from 'react';
+import { RoomService } from '../../services/room.service';
+import {
+  getCanvasDataURL,
+  replaceCanvasWithDataUrl,
+} from '../../utils/canvasUtils';
+import { DrawPoint } from '../models/DrawPoint.model';
 
 const SyncBoardComponent = ({
-  stompClient,
-  roomId,
+  roomService,
+  className,
 }: {
-  stompClient: Client;
-  roomId: string;
+  roomService: RoomService;
+  className?: string;
 }) => {
-  console.log('SyncBoardComponent');
-  const [imageData, setImageData] = useState<string>();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
-    stompClient.subscribe(`/draw-room/${roomId}/update`, (msg: Message) => {
-      console.log('Received Update From Server');
-      const message = JSON.parse(msg.body);
-      setImageData(message.message as unknown as string);
-      console.log(message.message);
+    if (canvasRef.current) {
+      canvasRef.current.width = 600;
+      canvasRef.current.height = 600;
+    }
+
+    roomService.subscribeToSyncRequest(() => {
+      const dataUrl = getCanvasDataURL(canvasRef.current);
+      dataUrl && roomService.sendSync(dataUrl);
     });
+    roomService.subscribeToSync((dataURl: string) => {
+      replaceCanvasWithDataUrl(canvasRef.current, dataURl);
+    });
+    roomService.subscribeToDrawUpdate((drawPoint: DrawPoint) => {
+      drawCanvas(drawPoint);
+    });
+
+    roomService.sendSyncRequest();
   }, []);
 
+  const drawCanvas = (p: DrawPoint) => {
+    const canvasContext = canvasRef.current?.getContext('2d');
+    if (!canvasContext) return;
+
+    canvasContext.strokeStyle = p.penColor;
+    canvasContext.lineWidth = p.penWidth;
+    canvasContext.lineCap = 'round';
+    canvasContext.beginPath();
+    canvasContext.moveTo(p.prevCoord.x, p.prevCoord.y);
+    canvasContext.quadraticCurveTo(
+      p.prevCoord.x,
+      p.prevCoord.y,
+      p.newCoord.x,
+      p.newCoord.y
+    );
+    canvasContext.stroke();
+  };
+
   return (
-    <div style={{ display: 'block', overflow: 'hidden' }}>
-      <ImageViewComponent imageData={imageData}></ImageViewComponent>
+    <div className={className} style={{ display: 'block', overflow: 'hidden' }}>
+      <canvas className={className} ref={canvasRef} />
     </div>
   );
 };
