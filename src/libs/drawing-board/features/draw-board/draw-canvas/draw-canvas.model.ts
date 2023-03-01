@@ -1,8 +1,6 @@
-import { Client } from 'stompjs';
+import { RoomService } from '../../../services/room.service';
 export interface DrawCanvasComponentProps {
-  roomId: string;
-  userName: string;
-  stompClient: Client;
+  roomService: RoomService;
   penColor: string;
   setImageData: React.Dispatch<React.SetStateAction<any>>;
 }

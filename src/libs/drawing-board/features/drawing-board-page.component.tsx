@@ -1,58 +1,49 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { over, Client, Message } from 'stompjs';
-import SockJS from 'sockjs-client';
 import DrawBoardComponent from './draw-board/draw-board.component';
 import SyncBoardComponent from './sync-board/sync-board.component';
 import './drawing-board-page.style.css';
+import { RoomService } from '../services/room.service';
 
-const WS_URL = `${process.env.REACT_APP_API_URL}/ws`;
 const DrawingBoardPageComponent = () => {
   const { roomId, userName } = useParams<{
     roomId: string;
     userName: string;
   }>();
-
-  const stompClientRef = useRef<Client | null>(null);
+  const roomServiceRef = useRef<RoomService | null>(null);
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
-    if (stompClientRef.current) {
+    if (!roomId || !userName) {
       return;
     }
-    const connect = () => {
-      const sockjs = new SockJS(WS_URL);
-      const stompClient = over(sockjs);
-      stompClient.connect(
-        {},
-        () => onConnected(stompClient),
-        (err: any) => {
-          console.error('Error while connecting to stomp');
-          console.error(err);
-        }
-      );
-    };
 
-    const onConnected = (clientConnected: Client) => {
-      stompClientRef.current = clientConnected;
-      setIsReady(true);
+    const initialize = async () => {
+      try {
+        const roomService = await new RoomService(
+          roomId,
+          userName
+        ).connectToRoom();
+        roomServiceRef.current = roomService;
+        setIsReady(true);
+      } catch (errInitializing) {
+        console.error(errInitializing);
+        //TODO: Handle error connecting to the room
+      }
     };
-    connect();
+    initialize();
   }, []);
 
   return (
     <div className="draw-board-page-wrapper">
-      {isReady && stompClientRef.current && roomId && userName ? (
+      {isReady && roomServiceRef.current && roomId && userName ? (
         <>
           <DrawBoardComponent
             className="draw-board-wrapper"
-            stompClient={stompClientRef.current}
-            roomId={roomId}
-            userName={userName}
+            roomService={roomServiceRef.current}
           ></DrawBoardComponent>
           <SyncBoardComponent
             className="sync-board-wrapper"
-            stompClient={stompClientRef.current}
-            roomId={roomId}
+            roomService={roomServiceRef.current}
           ></SyncBoardComponent>
         </>
       ) : (

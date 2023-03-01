@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { CreateRoomPayload, JoinRoomPayload, RoomInfo } from './room.model';
 const URL = process.env.REACT_APP_API_URL;
 
@@ -29,9 +29,12 @@ export async function joinRoom({
   }
 }
 
-export async function getRoom(roomId: string) {
+export async function getRoom(roomId: string): Promise<RoomInfo> {
   try {
     const { data } = await axios.get<RoomInfo>(`${URL}/room/${roomId}`);
+    if (!data) {
+      throw new Error('room undefined');
+    }
     return data;
   } catch (err) {
     throw err;

@@ -1,14 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Client, Message } from 'stompjs';
-import { CanvasCoordinate, DrawPoint } from '../models/DrawPoint.model';
+import React, { useRef, useEffect } from 'react';
+import { RoomService } from '../../services/room.service';
+import {
+  getCanvasDataURL,
+  replaceCanvasWithDataUrl,
+} from '../../utils/canvasUtils';
+import { DrawPoint } from '../models/DrawPoint.model';
 
 const SyncBoardComponent = ({
-  stompClient,
-  roomId,
+  roomService,
   className,
 }: {
-  stompClient: Client;
-  roomId: string;
+  roomService: RoomService;
   className?: string;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -17,18 +19,25 @@ const SyncBoardComponent = ({
       canvasRef.current.width = 600;
       canvasRef.current.height = 600;
     }
-    stompClient.subscribe(`/draw-room/${roomId}/update`, (msg: Message) => {
-      const message = JSON.parse(msg.body);
-      const newDrawpoint = message.message as unknown as DrawPoint;
-      drawCanvas(newDrawpoint);
+
+    roomService.subscribeToSyncRequest(() => {
+      const dataUrl = getCanvasDataURL(canvasRef.current);
+      dataUrl && roomService.sendSync(dataUrl);
     });
+    roomService.subscribeToSync((dataURl: string) => {
+      replaceCanvasWithDataUrl(canvasRef.current, dataURl);
+    });
+    roomService.subscribeToDrawUpdate((drawPoint: DrawPoint) => {
+      drawCanvas(drawPoint);
+    });
+
+    roomService.sendSyncRequest();
   }, []);
 
   const drawCanvas = (p: DrawPoint) => {
     const canvasContext = canvasRef.current?.getContext('2d');
-    if (!canvasContext) {
-      return;
-    }
+    if (!canvasContext) return;
+
     canvasContext.strokeStyle = p.penColor;
     canvasContext.lineWidth = p.penWidth;
     canvasContext.lineCap = 'round';

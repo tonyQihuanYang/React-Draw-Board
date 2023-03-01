@@ -1,19 +1,14 @@
-import { Client } from 'stompjs';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import ColorPickerComponent from './color-picker/color-picker.component';
 import DrawCanvasComponent from './draw-canvas/draw-canvas.component';
 import ImageViewComponent from '../../components/image-view/image-view.component';
+import { RoomService } from '../../services/room.service';
 
-const DRAW_EVENT = '/app/draw-room';
 const DrawBoardComponent = ({
-  stompClient,
-  roomId,
-  userName,
+  roomService,
   className,
 }: {
-  stompClient: Client;
-  roomId: string;
-  userName: string;
+  roomService: RoomService;
   className?: string;
 }) => {
   const [penColor, setPenColor] = useState('#000000');
@@ -23,18 +18,6 @@ const DrawBoardComponent = ({
     dataURL: string;
   }>();
 
-  useEffect(() => {
-    if (!imageData) {
-      return;
-    }
-    const drawRoomMessage = {
-      roomId,
-      sendBy: userName,
-      message: imageData.dataURL,
-    };
-    // stompClient.send(DRAW_EVENT, {}, JSON.stringify(drawRoomMessage));
-  }, [imageData]);
-
   return (
     <div className={className} style={{ display: 'block', overflow: 'hidden' }}>
       <ColorPickerComponent
@@ -43,9 +26,7 @@ const DrawBoardComponent = ({
       ></ColorPickerComponent>
       <div>
         <DrawCanvasComponent
-          stompClient={stompClient}
-          roomId={roomId}
-          userName={userName}
+          roomService={roomService}
           setImageData={setImageData}
           penColor={penColor}
         ></DrawCanvasComponent>

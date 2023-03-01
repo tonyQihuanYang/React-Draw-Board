@@ -1,14 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
+import {
+  clearCanvas,
+  getCanvasDataURL,
+  getCanvasImageData,
+} from '../../../utils/canvasUtils';
 import { CanvasCoordinate, DrawPoint } from '../../models/DrawPoint.model';
 import { DrawCanvasComponentProps } from './draw-canvas.model';
 import './draw-canvas.style.css';
 
-const DRAW_EVENT = '/app/draw-room';
-const MINE_TYPE = 'image/png';
 const DrawCanvasComponent = ({
-  stompClient,
-  roomId,
-  userName,
+  roomService,
   penColor,
   setImageData,
 }: DrawCanvasComponentProps) => {
@@ -19,16 +20,12 @@ const DrawCanvasComponent = ({
 
   useEffect(() => {
     if (canvasRef.current) {
-      console.log('1');
-      // canvasRef.current.width = window.innerWidth;
-      // canvasRef.current.height = window.innerHeight;
       canvasRef.current.width = 600;
       canvasRef.current.height = 600;
 
       canvasRef.current?.addEventListener(
         'touchmove',
         (event) => {
-          console.log('touchMove');
           event.preventDefault();
           drawLine(event.touches[0].clientX, event.touches[0].clientY);
         },
@@ -38,7 +35,6 @@ const DrawCanvasComponent = ({
       canvasRef.current?.addEventListener(
         'touchstart',
         (event) => {
-          console.log('touchStarted');
           event.preventDefault();
           startDrawing(event.touches[0].clientX, event.touches[0].clientY);
         },
@@ -48,7 +44,6 @@ const DrawCanvasComponent = ({
       canvasRef.current?.addEventListener(
         'touchend',
         (event) => {
-          console.log('touchEnd');
           event.preventDefault();
           stopDrawing();
         },
@@ -64,12 +59,7 @@ const DrawCanvasComponent = ({
       penWidth: 1,
       penColor,
     };
-    const drawRoomMessage = {
-      roomId,
-      sendBy: userName,
-      message: newDrawpoint,
-    };
-    stompClient.send(DRAW_EVENT, {}, JSON.stringify(drawRoomMessage));
+    roomService.sendDrawUpdate(newDrawpoint);
     drawCanvas(newDrawpoint);
     prevCoord.current = _point;
   };
@@ -114,21 +104,12 @@ const DrawCanvasComponent = ({
     if (!canvasContext) {
       return;
     }
-
-    const imageData = canvasContext.getImageData(0, 0, 600, 600);
-    const dataURL = canvasRef.current.toDataURL();
-    canvasRef.current.toBlob(async (blob) => {
-      if (!blob) {
-        return;
-      }
-      try {
-        const arrayBuffer = await blob.arrayBuffer();
-        setImageData({ imageData, dataURL, arrayBuffer: arrayBuffer });
-        canvasContext.clearRect(0, 0, 600, 600);
-      } catch (err) {
-        console.error(err);
-      }
-    }, MINE_TYPE);
+    //
+    const imageData = getCanvasImageData(canvasRef.current);
+    const dataURL = getCanvasDataURL(canvasRef.current);
+    // const arrayBuffer = await getCanvasArrayBuffer(canvasRef.current);
+    setImageData({ imageData, dataURL, arrayBuffer: null });
+    clearCanvas(canvasRef.current);
   };
 
   const calcCoordinate = (
@@ -147,12 +128,9 @@ const DrawCanvasComponent = ({
   };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    console.log('mouseDown');
-    console.log(event);
     startDrawing(event.pageX, event.pageY);
   };
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    console.log('mouseMove');
     drawLine(event.pageX, event.pageY);
   };
 
