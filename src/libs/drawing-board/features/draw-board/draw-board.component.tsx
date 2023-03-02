@@ -29,6 +29,7 @@ const DrawBoardComponent = ({
           roomService={roomService}
           setImageData={setImageData}
           penColor={penColor}
+          penWidth={1}
         ></DrawCanvasComponent>
         <ImageViewComponent imageData={imageData?.dataURL}></ImageViewComponent>
       </div>

@@ -85,6 +85,7 @@ export class RoomService {
     return new Promise((resolve, reject) => {
       const sockjs = new SockJS(this.WS_URL);
       const stompClient = over(sockjs);
+      stompClient.debug = () => {};
       stompClient.connect(
         {},
         () => resolve(stompClient),

@@ -41,10 +41,10 @@ const DrawingBoardPageComponent = () => {
             className="draw-board-wrapper"
             roomService={roomServiceRef.current}
           ></DrawBoardComponent>
-          <SyncBoardComponent
-            className="sync-board-wrapper"
-            roomService={roomServiceRef.current}
-          ></SyncBoardComponent>
+          {/* <SyncBoardComponent */}
+          {/*   className="sync-board-wrapper" */}
+          {/*   roomService={roomServiceRef.current} */}
+          {/* ></SyncBoardComponent> */}
         </>
       ) : (
         <> Waiting on connection </>

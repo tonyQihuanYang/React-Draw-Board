@@ -5,59 +5,90 @@ import {
   getCanvasImageData,
 } from '../../../utils/canvasUtils';
 import { CanvasCoordinate, DrawPoint } from '../../models/DrawPoint.model';
-import { DrawCanvasComponentProps } from './draw-canvas.model';
+import { DrawCanvasComponentProps, DrawCanvasOpts } from './draw-canvas.model';
 import './draw-canvas.style.css';
 
 const DrawCanvasComponent = ({
   roomService,
   penColor,
+  penWidth,
   setImageData,
 }: DrawCanvasComponentProps) => {
   const readerRef = useRef<FileReader>(new FileReader());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const touchMoveEventRef = useRef<null | ((e: TouchEvent) => void)>(null);
+  const touchStartEventRef = useRef<null | ((e: TouchEvent) => void)>(null);
+  const touchEndEventRef = useRef<null | ((e: TouchEvent) => void)>(null);
+
   const isPointerDown = useRef(false);
   const prevCoord = useRef({ x: 0, y: 0 });
+  const drawOpts: DrawCanvasOpts = {
+    penColor,
+    penWidth,
+  };
 
   useEffect(() => {
-    if (canvasRef.current) {
-      canvasRef.current.width = 600;
-      canvasRef.current.height = 600;
+    /**
+     * Note: Reason manully listen events is becasue it needs
+     * e.preventDefault on Ipad to prevent the scoll
+     */
+    if (!canvasRef.current) return;
 
-      canvasRef.current?.addEventListener(
+    canvasRef.current.width = 600;
+    canvasRef.current.height = 600;
+
+    // Remove all event listeners if present
+    touchMoveEventRef.current &&
+      canvasRef.current.removeEventListener(
         'touchmove',
-        (event) => {
-          event.preventDefault();
-          drawLine(event.touches[0].clientX, event.touches[0].clientY);
-        },
-        { passive: false }
+        touchMoveEventRef.current
       );
-
-      canvasRef.current?.addEventListener(
+    touchStartEventRef.current &&
+      canvasRef.current.removeEventListener(
         'touchstart',
-        (event) => {
-          event.preventDefault();
-          startDrawing(event.touches[0].clientX, event.touches[0].clientY);
-        },
-        { passive: false }
+        touchStartEventRef.current
+      );
+    touchEndEventRef.current &&
+      canvasRef.current.removeEventListener(
+        'touchend',
+        touchEndEventRef.current
       );
 
-      canvasRef.current?.addEventListener(
-        'touchend',
-        (event) => {
-          event.preventDefault();
-          stopDrawing();
-        },
-        { passive: false }
-      );
-    }
-  }, []);
+    // define all event handlers
+    touchMoveEventRef.current = (event: TouchEvent) => {
+      event.preventDefault();
+      drawLine(event.touches[0].clientX, event.touches[0].clientY);
+    };
+
+    touchStartEventRef.current = (event: TouchEvent) => {
+      event.preventDefault();
+      startDrawing(event.touches[0].clientX, event.touches[0].clientY);
+    };
+
+    touchEndEventRef.current = (event: TouchEvent) => {
+      event.preventDefault();
+      stopDrawing();
+    };
+
+    // listener to all event handlers
+    canvasRef.current.addEventListener('touchmove', touchMoveEventRef.current, {
+      passive: false,
+    });
+    canvasRef.current.addEventListener(
+      'touchstart',
+      touchStartEventRef.current,
+      { passive: false }
+    );
+    canvasRef.current.addEventListener('touchend', touchEndEventRef.current, {
+      passive: false,
+    });
+  }, [penColor, penWidth]);
 
   const startDraw = (_point: CanvasCoordinate) => {
     const newDrawpoint = {
       prevCoord: prevCoord.current,
       newCoord: _point,
-      penWidth: 1,
-      penColor,
+      ...drawOpts,
     };
     roomService.sendDrawUpdate(newDrawpoint);
     drawCanvas(newDrawpoint);
@@ -107,7 +138,6 @@ const DrawCanvasComponent = ({
     //
     const imageData = getCanvasImageData(canvasRef.current);
     const dataURL = getCanvasDataURL(canvasRef.current);
-    // const arrayBuffer = await getCanvasArrayBuffer(canvasRef.current);
     setImageData({ imageData, dataURL, arrayBuffer: null });
     clearCanvas(canvasRef.current);
   };

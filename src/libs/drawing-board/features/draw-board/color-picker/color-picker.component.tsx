@@ -11,6 +11,7 @@ const ColorPickerComponent = ({
   setColor,
 }: ColorPickerComponentProps) => {
   const handleChange = (color: any) => {
+    console.log('Setting Color to ', color);
     setColor(color);
   };
 
