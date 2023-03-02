@@ -1,11 +1,7 @@
 .canvas-component-wrapper {
-  border: 1px black solid;
-  /* margin: 1rem; */
-  /* display: block; */
   overflow: hidden;
   overflow-y: hidden;
   pointer-events: auto;
   z-index: 100;
   position: absolute;
-  /* position: fixed; */
 }

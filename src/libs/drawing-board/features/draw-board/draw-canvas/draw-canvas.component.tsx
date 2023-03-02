@@ -33,10 +33,8 @@ const DrawCanvasComponent = ({
      * e.preventDefault on Ipad to prevent the scoll
      */
     if (!canvasRef.current) return;
-
-    canvasRef.current.width = 600;
-    canvasRef.current.height = 600;
-
+    canvasRef.current.width = document.documentElement.clientWidth;
+    canvasRef.current.height = document.documentElement.clientHeight;
     // Remove all event listeners if present
     touchMoveEventRef.current &&
       canvasRef.current.removeEventListener(

@@ -1,35 +1,26 @@
 export function clearCanvas(canvasEle: HTMLCanvasElement | null) {
   const canvasContext = getCanvas2DContext(canvasEle);
-  if (!canvasContext) {
+  if (!canvasContext || !canvasEle) {
     return null;
   }
-  canvasContext.clearRect(0, 0, 600, 600);
+  canvasContext.clearRect(0, 0, canvasEle.height, canvasEle.width);
 }
 
 export function replaceCanvasWithDataUrl(
   canvasEle: HTMLCanvasElement | null,
-  dataUrl: string
+  dataUrl: string,
+  width: number,
+  height: number
 ): void {
   const canvasContext = getCanvas2DContext(canvasEle);
   if (!canvasContext || !canvasEle) {
     return;
   }
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = canvasEle.width;
-  tempCanvas.height = canvasEle.height;
   const image = new Image();
   if (image) {
     image.addEventListener(
       'load',
-      function () {
-        canvasContext.drawImage(
-          image,
-          0,
-          0,
-          tempCanvas.height,
-          tempCanvas.width
-        );
-      },
+      () => canvasContext.drawImage(image, 0, 0, width, height),
       false
     );
     image.src = dataUrl;
@@ -78,5 +69,5 @@ export function getCanvasArrayBuffer(
 }
 
 function getCanvas2DContext(canvasEle?: HTMLCanvasElement | null) {
-  return canvasEle?.getContext('2d') || null;
+  return canvasEle?.getContext('2d', { willReadFrequently: true }) || null;
 }

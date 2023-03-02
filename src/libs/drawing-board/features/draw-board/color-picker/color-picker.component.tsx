@@ -4,18 +4,26 @@ import { MuiColorInput } from 'mui-color-input';
 interface ColorPickerComponentProps {
   color: string;
   setColor: React.Dispatch<React.SetStateAction<string>>;
+  className?: string;
 }
 
 const ColorPickerComponent = ({
   color,
   setColor,
+  className,
 }: ColorPickerComponentProps) => {
   const handleChange = (color: any) => {
-    console.log('Setting Color to ', color);
     setColor(color);
   };
 
-  return <MuiColorInput value={color} onChange={handleChange} />;
+  return (
+    <MuiColorInput
+      style={{ position: 'absolute' }}
+      className={className}
+      value={color}
+      onChange={handleChange}
+    />
+  );
 };
 
 export default ColorPickerComponent;

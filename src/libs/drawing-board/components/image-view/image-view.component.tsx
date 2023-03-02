@@ -1,11 +1,12 @@
 import React, { useRef, useEffect } from 'react';
+import { replaceCanvasWithDataUrl } from '../../utils/canvasUtils';
 
 const ImageViewComponent = ({ imageData }: { imageData?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (canvasRef.current) {
-      canvasRef.current.width = 600;
-      canvasRef.current.height = 600;
+      canvasRef.current.width = document.documentElement.clientWidth;
+      canvasRef.current.height = document.documentElement.clientHeight;
     }
   }, []);
   useEffect(() => {
@@ -16,32 +17,17 @@ const ImageViewComponent = ({ imageData }: { imageData?: string }) => {
     if (!canvasContext) {
       return;
     }
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvasRef.current.width;
-    tempCanvas.height = canvasRef.current.height;
-
-    let image = new Image();
-    if (image) {
-      image.addEventListener(
-        'load',
-        function () {
-          canvasContext.drawImage(
-            image,
-            0,
-            0,
-            tempCanvas.height,
-            tempCanvas.width
-          );
-        },
-        false
-      );
-      image.src = imageData;
-    }
+    replaceCanvasWithDataUrl(
+      canvasRef.current,
+      imageData,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
   }, [imageData]);
 
   return (
     <canvas
-      style={{ position: 'absolute', border: '1px black solid' }}
+      style={{ position: 'absolute', top: 0, zIndex: 0, overflow: 'hidden' }}
       ref={canvasRef}
     />
   );

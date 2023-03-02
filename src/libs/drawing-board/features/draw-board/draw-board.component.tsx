@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ColorPickerComponent from './color-picker/color-picker.component';
 import DrawCanvasComponent from './draw-canvas/draw-canvas.component';
 import ImageViewComponent from '../../components/image-view/image-view.component';
 import { RoomService } from '../../services/room.service';
-
+import './draw-board.style.css';
 const DrawBoardComponent = ({
   roomService,
   className,
@@ -18,21 +18,23 @@ const DrawBoardComponent = ({
     dataURL: string;
   }>();
 
+  // useEffect(() => {
+  //   imageData?.dataURL && roomService.sendSync(imageData.dataURL);
+  // }, [imageData]);
   return (
-    <div className={className} style={{ display: 'block', overflow: 'hidden' }}>
+    <div className={className}>
       <ColorPickerComponent
+        className="draw-board-toolbar-wrapper"
         color={penColor}
         setColor={setPenColor}
       ></ColorPickerComponent>
-      <div>
-        <DrawCanvasComponent
-          roomService={roomService}
-          setImageData={setImageData}
-          penColor={penColor}
-          penWidth={1}
-        ></DrawCanvasComponent>
-        <ImageViewComponent imageData={imageData?.dataURL}></ImageViewComponent>
-      </div>
+      <DrawCanvasComponent
+        roomService={roomService}
+        setImageData={setImageData}
+        penColor={penColor}
+        penWidth={1}
+      ></DrawCanvasComponent>
+      <ImageViewComponent imageData={imageData?.dataURL}></ImageViewComponent>
     </div>
   );
 };
