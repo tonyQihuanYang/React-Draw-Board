@@ -1,13 +1,17 @@
 .draw-board-page-wrapper {
   display: block;
   overflow: hidden;
-  margin: 8px;
+  height: 100vh;
+  width: 100vw;
 }
 
 .draw-board-wrapper {
+  position: absolute;
   z-index: 100;
 }
 
 .sync-board-wrapper {
+  position: absolute;
   z-index: 0;
+  top: 0;
 }

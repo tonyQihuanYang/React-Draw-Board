@@ -2,7 +2,11 @@ import { over, Client, Message } from 'stompjs';
 import SockJS from 'sockjs-client';
 import { getRoom, RoomInfo } from '../../shared/room/services';
 import { DrawPoint } from '../features/models/DrawPoint.model';
-import { RoomSendEvent, RoomSubscribeEvents } from './room.model';
+import {
+  RoomSendEvent,
+  RoomSubscribeEvents,
+  RoomSyncMessage,
+} from './room.model';
 
 export class RoomService {
   public wsClient: Client | null = null;
@@ -38,8 +42,8 @@ export class RoomService {
     this.sendMessage(RoomSendEvent.DrawUpdate, JSON.stringify(drawPoint));
   }
 
-  sendSync(dataUrl: string): void {
-    this.sendMessage(RoomSendEvent.Sync, dataUrl);
+  sendSync(syncMessage: RoomSyncMessage): void {
+    this.sendMessage(RoomSendEvent.Sync, JSON.stringify(syncMessage));
   }
 
   sendSyncRequest(): void {
@@ -70,13 +74,13 @@ export class RoomService {
     );
   }
 
-  subscribeToSync(callback: (dataUrl: string) => void) {
+  subscribeToSync(callback: (syncMessage: RoomSyncMessage) => void) {
     if (!this.wsClient || this.isUserOwner) return;
     this.wsClient.subscribe(
       `/draw-room/${this.roomId}/${RoomSubscribeEvents.Sync}`,
       (msg: Message) => {
         if (!msg.body) return;
-        callback(msg.body);
+        callback(JSON.parse(msg.body));
       }
     );
   }
@@ -85,6 +89,7 @@ export class RoomService {
     return new Promise((resolve, reject) => {
       const sockjs = new SockJS(this.WS_URL);
       const stompClient = over(sockjs);
+      stompClient.debug = () => {};
       stompClient.connect(
         {},
         () => resolve(stompClient),

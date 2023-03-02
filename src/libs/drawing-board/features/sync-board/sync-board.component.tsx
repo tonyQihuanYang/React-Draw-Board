@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { RoomSyncMessage } from '../../services/room.model';
 import { RoomService } from '../../services/room.service';
 import {
   getCanvasDataURL,
@@ -16,16 +17,27 @@ const SyncBoardComponent = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (canvasRef.current) {
-      canvasRef.current.width = 600;
-      canvasRef.current.height = 600;
+      canvasRef.current.width = document.documentElement.clientWidth;
+      canvasRef.current.height = document.documentElement.clientHeight;
     }
 
     roomService.subscribeToSyncRequest(() => {
+      if (!canvasRef.current) return;
       const dataUrl = getCanvasDataURL(canvasRef.current);
-      dataUrl && roomService.sendSync(dataUrl);
+      dataUrl &&
+        roomService.sendSync({
+          dataUrl,
+          width: canvasRef.current.width,
+          height: canvasRef.current.height,
+        });
     });
-    roomService.subscribeToSync((dataURl: string) => {
-      replaceCanvasWithDataUrl(canvasRef.current, dataURl);
+    roomService.subscribeToSync((roomSyncMessage: RoomSyncMessage) => {
+      replaceCanvasWithDataUrl(
+        canvasRef.current,
+        roomSyncMessage.dataUrl,
+        roomSyncMessage.width,
+        roomSyncMessage.height
+      );
     });
     roomService.subscribeToDrawUpdate((drawPoint: DrawPoint) => {
       drawCanvas(drawPoint);
@@ -52,11 +64,7 @@ const SyncBoardComponent = ({
     canvasContext.stroke();
   };
 
-  return (
-    <div className={className} style={{ display: 'block', overflow: 'hidden' }}>
-      <canvas className={className} ref={canvasRef} />
-    </div>
-  );
+  return <canvas className={className} ref={canvasRef} />;
 };
 
 export default SyncBoardComponent;

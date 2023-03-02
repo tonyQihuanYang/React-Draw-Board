@@ -3,9 +3,12 @@ export interface CanvasCoordinate {
   y: number;
 }
 
-export interface DrawPoint {
+export interface DrawPoint extends DrawOpts {
   prevCoord: CanvasCoordinate;
   newCoord: CanvasCoordinate;
+}
+
+export interface DrawOpts {
   penColor: string;
   penWidth: number;
 }

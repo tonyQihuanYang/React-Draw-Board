@@ -1,0 +1,11 @@
+.draw-board-toolbar-wrapper {
+  z-index: 200;
+  position: absolute;
+  top: 0;
+}
+
+.draw-board-canvas-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
